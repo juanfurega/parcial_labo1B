@@ -17,10 +17,9 @@ void InicializarActores(eActor lista[], int indice)
 	}
 }
 
-void CargarActor(eActor lista[], int indice, ePelicula listaPelis[], int maxPelis)
+void CargarActor(eActor lista[], int indice, ePelicula listaPelis[], int maxPelis, eRol listaRoles[])
 {
 	int j;
-	int pelicula;
 
 	for(int i = 0; i < indice; i++)
 	{
@@ -34,8 +33,12 @@ void CargarActor(eActor lista[], int indice, ePelicula listaPelis[], int maxPeli
 			gets(lista[i].apellido);
 			printf("Ingrese el nombre del personaje: ");
 			gets(lista[i].nombre_personaje);
-			printf("Ingrese el rol: ");
-			gets(lista[i].rol);
+			printf("Lista de roles disponibles\n");
+			for(int j = 0; j < 3; j++)
+			{
+				printf("ID: %d -> Rol: %s\n", listaRoles[j].idRol, listaRoles[j].descripcion);
+			}
+			utn_getNumero(&lista[i].idRol, "Ingrese el ID: ", "ERROR: Ingresaste un ID inválido\n", 1, 3, 10);
 			printf("Ingrese el valor del contrato: ");
 			scanf("%f", &lista[i].valor_contrato);
 			while(lista[i].valor_contrato < 0)
@@ -64,18 +67,15 @@ void CargarActor(eActor lista[], int indice, ePelicula listaPelis[], int maxPeli
 					printf("ID: %d -- Pelicula: %s\n", listaPelis[j].codigo, listaPelis[j].titulo);
 				}
 			}
-			printf("Ingrese el ID de la película en la que trabaja el actor: ");
-			scanf("%d", &pelicula);
-			lista[i].idPelicula = pelicula;
+			utn_getNumero(&lista[i].idPelicula, "Ingrese el ID de la película en la que trabaja el actor: ", "ERROR: Ingrese un ID válido\n", 1000, 1004, 10);
 			PrimerLetraMayuscula(lista[i].nombre);
 			PrimerLetraMayuscula(lista[i].apellido);
-			PrimerLetraMayuscula(lista[i].rol);
+			break;
 		}
-		break;
 	}
 }
 
-void ModificarActor(eActor lista[], int indice, ePelicula listaPelis[], int maxPelis)
+void ModificarActor(eActor lista[], int indice, ePelicula listaPelis[], int maxPelis, eRol roles[])
 {
 	int nuevoCodigo;
 
@@ -106,8 +106,12 @@ void ModificarActor(eActor lista[], int indice, ePelicula listaPelis[], int maxP
 					break;
 
 				case 2:
-					printf("Ingrese el nuevo rol: ");
-					gets(lista[i].rol);
+					printf("Lista de roles\n");
+					for(int i = 0; i < 3; i++)
+					{
+						printf("ID: %d -> %s\n", roles[i].idRol, roles[i].descripcion);
+					}
+					utn_getNumero(&lista[i].idRol, "Ingrese el nuevo ID del rol: ", "ERROR: Ingrese un ID válido\n", 1, 3, 10);
 					break;
 
 				case 3:
@@ -221,27 +225,34 @@ void OrdenarPeliculasAlfabeticamente(ePelicula listaPelis[], int maxPelis)
 	} // FOR I
 }
 
-void MostrarActoresPorPelicula(eActor lista[], int indice, ePelicula listaPelis[], int maxPelis)
+void MostrarActoresPorPelicula(eActor lista[], int indice, ePelicula listaPelis[], int maxPelis, eRol roles[])
 {
-	for(int i = 0; i < maxPelis; i++)
+	for(int i = 0; i < maxPelis; i++)//PELICULAS
 	{
 		if(listaPelis[i].estado == ALTA)
 		{
 			printf("Película %s\n", listaPelis[i].titulo);
-			for(int j = 0; j < indice; j++)
+			for(int j = 0; j < indice; j++)//ACTORES
 			{
 				if(listaPelis[i].codigo == lista[j].idPelicula)
 				{
-					printf("%s, %s Interpreta a %s con el rol de %s. Su contrato inicio el %d/%d/%d y finaliza el %d/%d/%d. Ganó %d oscar(s)\n",
-							lista[j].apellido, lista[j].nombre, lista[j].nombre_personaje, lista[j].rol, lista[j].inicio_contrato.dia, lista[j].inicio_contrato.mes,
-							lista[j].inicio_contrato.anio, lista[j].fin_contrato.dia, lista[j].fin_contrato.mes, lista[j].fin_contrato.anio, lista[j].oscar);
+					for(int y = 0; y < 3; y++)
+					{
+						if(roles[y].idRol == lista[j].idRol)
+						{
+							printf("%s, %s Interpreta a %s con el rol de %s. Su contrato inicio el %d/%d/%d y finaliza el %d/%d/%d. Ganó %d oscar(s)\n",
+									lista[j].apellido, lista[j].nombre, lista[j].nombre_personaje, roles[y].descripcion, lista[j].inicio_contrato.dia, lista[j].inicio_contrato.mes,
+									lista[j].inicio_contrato.anio, lista[j].fin_contrato.dia, lista[j].fin_contrato.mes, lista[j].fin_contrato.anio, lista[j].oscar);
+
+						}
+					}
 				}
 			}
 		}
 	}
 }
 
-void OrdenarYMostrarActoresPorContrato (eActor lista[], int indice)
+void OrdenarYMostrarActoresPorContrato (eActor lista[], int indice, eRol roles[])
 {
 	float auxiliar;
 	long gananciaTotal[TAM];
@@ -263,38 +274,44 @@ void OrdenarYMostrarActoresPorContrato (eActor lista[], int indice)
 
 	for(int i = 0; i < indice; i++)//CALCULAR GANANCIA TOTAL
 	{
-		int anios;
-		int meses;
+		int anios[indice];
+		int meses[indice];
 		int cuentaMes = 0;
-		int total;
+		int total[indice];
 
-		anios = (lista[i].fin_contrato.anio - lista[i].inicio_contrato.anio) * 12; //RESTA DE AÑOS Y MULTIPLICACION POR C/MESES
-		meses = lista[i].inicio_contrato.mes;
-		while(meses != lista[i].fin_contrato.mes) //CALCULO LA CANTIDAD DE MESES DEL AÑO QUE RESTE ANTES
+		anios[i] = (lista[i].fin_contrato.anio - lista[i].inicio_contrato.anio) * 12; //RESTA DE AÑOS Y MULTIPLICACION POR C/MESES
+		meses[i] = lista[i].inicio_contrato.mes;
+		while(meses[i] != lista[i].fin_contrato.mes) //CALCULO LA CANTIDAD DE MESES DEL AÑO QUE RESTE ANTES
 		{
 			cuentaMes++;
-			meses++;
+			meses[i]++;
 
-			if(meses == 12)
+			if(meses[i] == 12)
 			{
-				meses = 0;
+				meses[i] = 0;
 			}
 		}
 
-		total = anios + cuentaMes;
+		total[i] = anios[i] + cuentaMes;
 
-		gananciaTotal[i] = lista[i].valor_contrato * total;
+		gananciaTotal[i] = lista[i].valor_contrato * total[i];
 	}
 
 
 	for(int i = 0; i < indice; i++)//MOSTRAR
 	{
-		printf("%s, %s posee un sueldo de $%.2f ganará al finalizar el contrato $%ld\n", lista[i].apellido, lista[i].nombre, lista[i].valor_contrato, gananciaTotal[i]);
+		for(int j = 0; j < 3; j++)//ROLES
+		{
+			if(roles[j].idRol == lista[i].idRol)
+			{
+				printf("%s, %s con el rol de %s posee un sueldo de $%.2f ganará al finalizar el contrato $%ld\n", lista[i].apellido, lista[i].nombre, roles[j].descripcion, lista[i].valor_contrato, gananciaTotal[i]);
+			}
+		}
 	}
 
 }
 
-void ListarGanadoresOscar(eActor lista[], int indice, ePelicula listaPelis[], int maxPelis)
+void ListarGanadoresOscar(eActor lista[], int indice, ePelicula listaPelis[], int maxPelis, eRol roles[])
 {
 	for(int i = 0; i < indice; i++)//RECORRO ACTORES
 	{
@@ -304,8 +321,14 @@ void ListarGanadoresOscar(eActor lista[], int indice, ePelicula listaPelis[], in
 			{
 				if(lista[i].oscar > 0 && lista[j].oscar > 0)
 				{
-					printf("El actor %s, %s ¡ha ganado %d oscar(s) y participó de una película ganadora!\n", lista[i].apellido, lista[i].nombre, lista[i].oscar);
-					break;
+					for(int y = 0; y < 3; y++)
+					{
+						if(roles[y].idRol == lista[i].idRol)
+						{
+							printf("El actor %s, %s ¡ha ganado %d oscar(s) y participó de una película ganadora!\n", lista[i].apellido, lista[i].nombre, lista[i].oscar);
+							break;
+						}
+					}
 				}
 			}
 		}
@@ -353,23 +376,21 @@ void ListarPeliculasPorEstreno(ePelicula listaPelis[], int maxPelis)
 	}
 }
 
-void ListarPeliculasConPersonajesPorRol(eActor lista[], int indice, ePelicula listaPelis[], int maxPelis)
+void ListarPeliculasConPersonajesPorRol(eActor lista[], int indice, ePelicula listaPelis[], int maxPelis, eRol roles[])
 {
-	char auxiliar[50];
+	int auxiliar;
 
 	for(int i = 0; i < indice-1; i++)
 	{
 		for(int j = i+1; j < indice; j++)
 		{
-			if(strcmp(lista[i].rol, lista[j].rol) > 0) //SI CAMBIO EL SIGNO '>' POR '<' ORDENA AL REVÉS
+			if(lista[i].idRol > lista[j].idRol)
 			{
-				//CADENA ACTUAL A TEMPORAL
-				memcpy(auxiliar, lista[i].rol, 50);
+				auxiliar = lista[i].idRol;
 
-				//ACTUAL A SIGUIENTE ELEMENTO
-				memcpy(lista[i].rol, lista[j].rol, 50);
+				lista[i].idRol = lista[j].idRol;
 
-				memcpy(lista[j].rol, auxiliar, 50);
+				lista[j].idRol = auxiliar;
 			} // IF
 		} //FOR J
 	} // FOR I
@@ -383,7 +404,13 @@ void ListarPeliculasConPersonajesPorRol(eActor lista[], int indice, ePelicula li
 			{
 				if(listaPelis[i].codigo == lista[j].idPelicula)
 				{
-					printf("Rol: %s, Personaje: %s\n", lista[j].rol, lista[j].nombre_personaje);
+					for(int y = 0; y < 3; y++)//RECORRO ROLES
+					{
+						if(lista[j].idRol == roles[y].idRol)
+						{
+							printf("Rol: %s, Personaje: %s\n", roles[y].descripcion, lista[j].nombre_personaje);
+						}
+					}
 				}
 			}
 		}

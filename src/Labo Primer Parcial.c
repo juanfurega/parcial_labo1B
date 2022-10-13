@@ -15,12 +15,15 @@ int main(void)
 	long recaudacion[5];
 	int opcionUsuario;
 	int opcionSubMenu;
-	int banderaCarga = 0;
+	int banderaCarga = 1;
+	int acumuladorCarga = 0;
 
 	for(int i = 0; i < 5; i++) //BUCLE PARA GENERAR LO RECAUDADO POR CADA PELICULA
 	{
 		recaudacion[i] = GenerarNumeroAleatorio(150000000, 750000000);
 	}
+
+	eRol roles[3] = {{1, "Héroe"}, {2, "Villano"}, {3, "Secundario"}};
 
 	ePelicula listaPeliculas[5] = {{1000, "Thor", 90, "Taika Waikiki", {20, 9, 2024}, recaudacion[0], 1, ALTA},
 								   {1001, "Cars", 120, "Obito", {12, 10, 2024}, recaudacion[1], 2, ALTA},
@@ -28,11 +31,11 @@ int main(void)
 								   {1003, "Iron Man", 70, "Pepe", {27, 11, 2028}, recaudacion[3], 0, ALTA},
 								   {1004, "Hulk", 130, "Pato", {1, 1, 2037}, recaudacion[4], 0, ALTA}};
 
-	eActor listaActores[TAM];/* = {{100, "Juan Cruz", "Furega", "Thor", "Héroe", 100000, {15, 2, 2022}, {10, 2, 2030}, 0, OCUPADO, 1000},
-								{101, "Uchiha", "Pepe", "Mate", "Héroe", 50000, {10, 11, 2021}, {1, 1, 2025}, 0, OCUPADO, 1001},
-								{102, "Uzumaki", "Naruto", "Tony Stark", "Vilano", 200000, {5, 5, 2022}, {5, 5, 2030}, 0, OCUPADO, 1002}};*/
+	eActor listaActores[TAM] = {{100, "Juan Cruz", "Furega", "Thor",100000, {15, 1, 2022}, {10, 1, 2030}, 1, OCUPADO, 1000, 1},
+								{101, "Uchiha", "Pepe", "Mate", 50000, {10, 11, 2021}, {1, 1, 2025}, 3, OCUPADO, 1001, 3},
+								{102, "Uzumaki", "Naruto", "Tony Stark", 200000, {5, 5, 2022}, {5, 5, 2030}, 1, OCUPADO, 1002, 2}};
 
-	InicializarActores(listaActores, TAM); //COMENTAR SI USO DATOS HARDCODEADOS
+	//InicializarActores(listaActores, TAM); //COMENTAR SI USO DATOS HARDCODEADOS
 
 	do
 	{
@@ -49,14 +52,18 @@ int main(void)
 					switch(opcionSubMenu)
 					{
 						case 1:
-							CargarActor(listaActores, TAM, listaPeliculas, 5);
+							if(acumuladorCarga < TAM)
+							{
+								CargarActor(listaActores, TAM, listaPeliculas, 5, roles);
+								acumuladorCarga++;
+							}
 							banderaCarga = 1;
 							break;
 
 						case 2:
 							if(banderaCarga == 1)
 							{
-								ModificarActor(listaActores, TAM, listaPeliculas, 5);
+								ModificarActor(listaActores, TAM, listaPeliculas, 5, roles);
 							}
 							else
 							{
@@ -114,7 +121,7 @@ int main(void)
 								if(banderaCarga == 1)
 								{
 									OrdenarPeliculasAlfabeticamente(listaPeliculas, 5);
-									MostrarActoresPorPelicula(listaActores, TAM, listaPeliculas, 5);
+									MostrarActoresPorPelicula(listaActores, TAM, listaPeliculas, 5, roles);
 								}
 								else
 								{
@@ -126,7 +133,7 @@ int main(void)
 							case 2:
 								if(banderaCarga == 1)
 								{
-									OrdenarYMostrarActoresPorContrato(listaActores, TAM);
+									OrdenarYMostrarActoresPorContrato(listaActores, TAM, roles);
 								}
 								else
 								{
@@ -148,7 +155,7 @@ int main(void)
 							case 4:
 								if(banderaCarga == 1)
 								{
-									ListarGanadoresOscar(listaActores, TAM, listaPeliculas, 5);
+									ListarGanadoresOscar(listaActores, TAM, listaPeliculas, 5, roles);
 								}
 								else
 								{
@@ -163,7 +170,7 @@ int main(void)
 							case 6:
 								if(banderaCarga == 1)
 								{
-									ListarPeliculasConPersonajesPorRol(listaActores, TAM, listaPeliculas, 5);
+									ListarPeliculasConPersonajesPorRol(listaActores, TAM, listaPeliculas, 5, roles);
 								}
 								else
 								{
